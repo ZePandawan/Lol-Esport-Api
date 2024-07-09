@@ -49,4 +49,12 @@ app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
 
+// Liste des routes à créer
+// GET /leagues
+// GET /tournaments
+// GET /matches
+// GET /teams
+// GET /players
+
+// ID Worlds : 98767975604431411
 
