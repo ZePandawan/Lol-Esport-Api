@@ -1,41 +1,10 @@
-/*
-import fetch from 'node-fetch';
-const fetch = require('node-fetch');
-// Définition de l'adresse URL à requêter
-const url = 'https://esports-api.lolesports.com/persisted/gw/getLeagues?hl=fr-FR';
-
-// Configuration de la requête avec l'en-tête
-const options = {
-  method: 'GET',
-  headers: {
-    'x-api-key': '0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z'
-  }
-};
-
-// Envoi de la requête avec fetch
-fetch(url, options)
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Réponse réseau incorrecte');
-    }
-    return response.json(); // Analyser la réponse en tant que JSON
-  })
-  .then(data => {
-    console.log('Réponse de l\'API :', data);
-  })
-  .catch(error => {
-    console.error('Erreur lors de la requête :', error.message);
-  });
-
-
-*/
-
 const express = require('express');
 const app = express();
 const PORT = 6969;
 
 app.use(express.json());
 
+// Default route
 app.get('/', (req, res) => {
     res.json({
         name: 'LoL API',
@@ -45,16 +14,21 @@ app.get('/', (req, res) => {
     });
 });
 
+// Leagues routes
+app.get('/leagues',(req,res) => {
+  res.json({});
+});
+
+app.get('/leagues/id/:id',(req,res) => {
+  const leagueId = req.params.id;
+  res.json({
+    id: leagueId
+  });
+});
+
+
+
+// Launch server on specified port
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
-
-// Liste des routes à créer
-// GET /leagues
-// GET /tournaments
-// GET /matches
-// GET /teams
-// GET /players
-
-// ID Worlds : 98767975604431411
-
