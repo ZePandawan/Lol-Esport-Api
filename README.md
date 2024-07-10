@@ -10,7 +10,7 @@ Différents chemins utiles :
 
 ## Tournois
 
-- `/tournaments` : Récupère la liste des différents tournois
+- `/tournaments` : Récupère la liste des 300 derniers tournois passés
 - `/tournament/league/{id}` : Récupère le tournoi avec l'ID de Ligue associé
 - `/tournament/{id}` : Récupère le tournoi qui correspond à l'ID donné
 
@@ -29,5 +29,7 @@ Différents chemins utiles :
 - `/player/{surname}` : Récupère le profil du joueur
 
 ## Matchs
+
+*Le Chemin ci-dessous ne sera peut être pas développé*
 
 - `/match/{id}` : Récupère les informations du match avec l'ID spécifié

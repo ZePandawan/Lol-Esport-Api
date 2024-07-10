@@ -1,4 +1,9 @@
-const express = require('express');
+//const express = require('express');
+//const fetch = require('node-fetch');
+import express from 'express';
+import fetch from 'node-fetch';
+
+
 const app = express();
 const PORT = 6969;
 
@@ -22,22 +27,25 @@ app.get('/', (req, res) => {
 // #########################################################################################################################
 // ##################################################### LEAGUES ROUTES ####################################################
 // #########################################################################################################################
-app.get('/leagues',(req,res) => {
-  res.json({});
+app.get('/leagues', async (req,res) => {
+  const data = await requestData(`getLeagues?hl=fr-FR`);
+  res.json(data);
 });
 
-app.get('/leagues/id/:id',(req,res) => {
+app.get('/league/id/:id', async (req,res) => {
   const leagueId = req.params.id;
-  res.json({
-    id: leagueId
-  });
+  const data = await requestData(`getLeagues?hl=fr-FR`);
+  const leagues = data.data.leagues;
+  const league = leagues.find(l => l.id == leagueId);
+  res.json(league);
 });
 
-app.get('/leagues/name/:name',(req,res) => {
+app.get('/league/name/:name', async (req,res) => {
   const leagueName = req.params.name;
-  res.json({
-    name: leagueName
-  });
+  const data = await requestData(`getLeagues?hl=fr-FR`);
+  const leagues = data.data.leagues;
+  const league = leagues.find(l => l.name == leagueName);
+  res.json(league);
 });
 // #########################################################################################################################
 
@@ -46,22 +54,22 @@ app.get('/leagues/name/:name',(req,res) => {
 // #########################################################################################################################
 // ################################################### TOURNAMENTS ROUTES ##################################################
 // #########################################################################################################################
-app.get('/tournaments',(req,res) => {
-  res.json({});
+app.get('/tournaments', async (req,res) => {
+  const data = await requestData(`getCompletedEvents?hl=fr-FR`);
+  const tournaments = data.data.schedule.events;
+  res.json(tournaments);
 });
 
-app.get('/tournaments/league/:id',(req,res) => {
+app.get('/tournaments/league/:id', async (req,res) => {
   const leagueId = req.params.id;
-  res.json({
-    id: leagueId
-  });
+  const data = await requestData(`getTournamentsForLeague?hl=fr-FR&leagueId=${leagueId}`);
+  res.json(data);
 });
 
-app.get('/tournaments/:id',(req,res) => {
+app.get('/tournament/:id', async (req,res) => {
   const tournamentId = req.params.id;
-  res.json({
-    name: tournamentId
-  });
+  const data = await requestData(`getStandings?hl=fr-FR&tournamentId=${tournamentId}`);
+  res.json(data);
 });
 // #########################################################################################################################
 
@@ -70,29 +78,41 @@ app.get('/tournaments/:id',(req,res) => {
 // #########################################################################################################################
 // ###################################################### TEAMS ROUTES #####################################################
 // #########################################################################################################################
-app.get('/teams',(req,res) => {
-  res.json({});
+app.get('/teams', async (req,res) => {
+  const data = await requestData(`getTeams?hl=fr-FR`);
+  res.json(data);
 });
 
-app.get('/teams/:search',(req,res) => {
+app.get('/team/:name', async (req,res) => {
+  const teamName = req.params.name;
+  const data = await requestData(`getTeams?hl=fr-FR`);
+  const teams = data.data.teams;
+  const team = teams.find(t => t.name == teamName);
+  res.json(team);
+});
+
+app.get('/teams/:search', async (req,res) => {
   const searchRequest = req.params.search;
-  res.json({
-    id: searchRequest
-  });
+  const data = await requestData(`getTeams?hl=fr-FR`);
+  const teams = data.data.teams;
+  const searchResults = teams.filter(t => t.name.includes(searchRequest));
+  res.json(searchResults);
 });
 
-app.get('/teams/league/:name',(req,res) => {
+app.get('/teams/league/:name', async (req,res) => {
   const leagueName = req.params.name;
-  res.json({
-    name: leagueName
-  });
+  const data = await requestData(`getTeams?hl=fr-FR`);
+  const teams = data.data.teams;
+  const teamsInLeague = teams.filter(t => t.homeLeague && t.homeLeague.name && t.homeLeague.name.includes(leagueName));
+  res.json(teamsInLeague);
 });
 
-app.get('/teams/region/:name',(req,res) => {
+app.get('/teams/region/:name', async (req,res) => {
   const regionName = req.params.name;
-  res.json({
-    name: regionName
-  });
+  const data = await requestData(`getTeams?hl=fr-FR`);
+  const teams = data.data.teams;
+  const teamsInRegion = teams.filter(t => t.homeLeague && t.homeLeague.region && t.homeLeague.region.includes(regionName));
+  res.json(teamsInRegion);
 });
 // #########################################################################################################################
 
@@ -101,11 +121,10 @@ app.get('/teams/region/:name',(req,res) => {
 // #########################################################################################################################
 // ###################################################### MATCHS ROUTE #####################################################
 // #########################################################################################################################
-app.get('/match/:id',(req,res) => {
+app.get('/match/:id', async (req,res) => {
   const matchId = req.params.id;
-  res.json({
-    name: matchId
-  });
+  const data = await requestData(`getWindow?gameId=${matchId}`);
+  res.json(data);
 });
 // #########################################################################################################################
 
@@ -123,3 +142,28 @@ app.use((req, res, next) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+
+// Fonction pour récupérer les données de l'API
+async function requestData(path){
+  const url = `https://esports-api.lolesports.com/persisted/gw/${path}`;
+  const options = {
+    method: 'GET',
+    headers: {
+      'x-api-key': '0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z'
+    }
+  };
+  
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      throw new Error('Réponse réseau incorrecte');
+    }
+    const data = await response.json(); // Analyser la réponse en tant que JSON
+    console.log('Réponse de l\'API :', data);
+    return data;
+  } catch (error) {
+    console.error('Erreur lors de la requête :', error.message);
+    throw error;
+  }
+}
