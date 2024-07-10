@@ -26,7 +26,18 @@ app.get('/leagues/id/:id',(req,res) => {
   });
 });
 
+app.get('/leagues/name/:name',(req,res) => {
+  const leagueName = req.params.name;
+  res.json({
+    name: leagueName
+  });
+});
 
+
+// 404 error
+app.use((req, res, next) => {
+  res.status(404).send('Sorry, this route does not exist!');
+});
 
 // Launch server on specified port
 app.listen(PORT, () => {
